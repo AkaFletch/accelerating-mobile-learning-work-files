@@ -48,11 +48,11 @@ def processFile(f):
         count = count+1
         if maxCPU < processed[1]:
             maxCPU = processed[1]
-        elif minCPU > processed[1]:
+        if minCPU > processed[1]:
             minCPU = processed[1]
         if minRam > int(processed[0].split('/')[0]):
             minRam = int(processed[0].split('/')[0])
-        elif maxRam < int(processed[0].split('/')[0]):
+        if maxRam < int(processed[0].split('/')[0]):
             maxRam = int(processed[0].split('/')[0])
         countRam = countRam + int(processed[0].split('/')[0])
         countCpu = countCpu + processed[1]
@@ -73,12 +73,14 @@ ws1.title = "Data"
 rowCount = 7
 
 places = dict()
+counts = dict()
 for i in dirs:
     f = args.dir + "/" + str(i)
     record = open(f, "r")
     if(len(record.readlines()) > 0):
         if str(i[0:-2]) not in places:
             places[str(i[0:-2])] = count
+            counts[count] = 0
             ws1.cell(column=1, row = (count*rowCount)+1, value="Name")
             ws1.cell(column=2, row = (count*rowCount)+1, value=str(i[0:-2]))
             ws1.cell(column=1, row = (count*rowCount)+2, value="CPU Avg")
@@ -88,9 +90,11 @@ for i in dirs:
             ws1.cell(column=1, row = (count*rowCount)+6, value="Max RAM")
             ws1.cell(column=1, row = (count*rowCount)+7, value="Min RAM")
             count = count + 1
+        else:
+            counts[places[str(i[0:-2])]] = counts[places[str(i[0:-2])]] + 1;
         record.seek(0)
         vals = processFile(record)
         for j in range(1,rowCount):
-            ws1.cell(column=2 + int(i[-1]), row = (places[str(i[0:-2])]*rowCount) + j + 1, value=vals[j-1])
+            ws1.cell(column=2 + counts[places[str(i[0:-2])]], row = (places[str(i[0:-2])]*rowCount) + j + 1, value=vals[j-1])
 
 wb.save(filename = dest_filename)
